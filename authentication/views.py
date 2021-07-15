@@ -1,6 +1,10 @@
+from os import stat
+from re import L
 import jwt
+import json
 
 from django.shortcuts import render
+from django.views import View
 from django.conf import settings
 from django.contrib import auth
 
@@ -9,7 +13,11 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .serializers import UserSerializer, LoginSerializer
+from .serializers import (
+    UserSerializer, 
+    LoginSerializer,
+    FrontUserSerializer,
+)
 
 
 class RegisterView(GenericAPIView):
@@ -17,6 +25,7 @@ class RegisterView(GenericAPIView):
 
     def post(self, request):
         serializer = UserSerializer(data=request.data)
+        print(request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -28,6 +37,7 @@ class LoginView(GenericAPIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
+        print(request.data)
         data = request.data
         username = data.get('username', '')
         password = data.get('password', '')
@@ -45,3 +55,32 @@ class LoginView(GenericAPIView):
 
             # SEND RES
         return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class UserView(GenericAPIView):
+    serializer_class = FrontUserSerializer
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            data = FrontUserSerializer(request.user).data
+            return Response(json.dumps(data), status=status.HTTP_200_OK)
+        else:
+            print("HOLY fuck user is not authenticated")
+            return Response(
+                data = {
+                    "success": False,
+                    "msg": "what the fuck",
+                }, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+class TwoFAPage(View):
+
+    def get(self, request, *args, **kwargs):
+        return render(request, "entry.html", context={})
+
+    def post(self, requeset, *args, **kwargs):
+        data = {"receptor": phone_number,
+            "token": get_token(user),
+            "template": "entery",
+        }

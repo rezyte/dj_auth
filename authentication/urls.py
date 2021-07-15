@@ -1,10 +1,17 @@
 from django.urls import path
 
-from .views import RegisterView, LoginView
+from .views import (
+    RegisterView, 
+    LoginView,
+    UserView,
+    TwoFAPage,
+)
 
 app_name = "authentication"
 
 urlpatterns = [
-    path('register', RegisterView.as_view()),
-    path('login', LoginView.as_view()),
+    path('signup', RegisterView.as_view()),
+    path('signin', LoginView.as_view()),
+    path("user", UserView.as_view()),
+    path("enter", TwoFAPage.as_view()),
 ]
